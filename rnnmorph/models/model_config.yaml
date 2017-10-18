@@ -305,7 +305,7 @@ config:
           kernel_regularizer: null
           name: dense_2
           trainable: true
-          units: 253
+          units: 389
           use_bias: true
       name: time_distributed_6
       trainable: true

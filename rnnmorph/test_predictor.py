@@ -28,7 +28,7 @@ class TestLSTMMorph(unittest.TestCase):
                            'Gender=Masc|Mood=Ind|Number=Sing|Tense=Past|VerbForm=Fin|Voice=Act')
 
     def test_sentence_analysis2(self):
-        forms = self.predictor.predict_sentence_tags(["мама", "мыла", "раму"])
+        forms = self.predictor.predict_sentence_tags(["мама", "мыла", "раму", "."])
         self.__asert_parse(forms[0], 'NOUN', 'мама', 'Case=Nom|Gender=Fem|Number=Sing')
         self.__asert_parse(forms[1], 'VERB', 'мыть',
                            'Gender=Fem|Mood=Ind|Number=Sing|Tense=Past|VerbForm=Fin|Voice=Act')
@@ -48,7 +48,7 @@ class TestLSTMMorph(unittest.TestCase):
     def test_proba(self):
         forms = self.predictor.predict_sentence_tags_proba(["косил", "косой", "косой", "косой"])
         for word_proba in forms:
-            self.assertEqual(len(word_proba), 252)
+            self.assertEqual(len(word_proba), 388)
         indices = np.array([pair[0] for pair in forms[2]]).argsort()[-5:][::-1]
         variants = [forms[2][i][1].tag for i in indices]
         self.assertIn('Case=Nom|Degree=Pos|Gender=Masc|Number=Sing', variants)

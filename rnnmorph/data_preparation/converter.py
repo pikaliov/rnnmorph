@@ -23,6 +23,8 @@ class UDConverter:
                     else:
                         gram = records[4]
                     gram = process_gram_tag(gram)
+                    if gram == "":
+                        gram = "_"
                     if pos == "PUNCT" and not with_punct:
                         continue
                     w.write("\t".join([records[1], records[2].lower(), pos, gram]) + "\n")

@@ -3,11 +3,13 @@
 # Описание: Обучение модели с определёнными параметрами.
 
 import os
+import numpy as np
 from typing import List, Tuple
 
-from rnnmorph.model import LSTMMorphoAnalysis
-
 os.environ["CUDA_VISIBLE_DEVICES"] = "1"
+os.environ["CUDA_LAUNCH_BLOCKING"] = "1"
+
+from rnnmorph.model import LSTMMorphoAnalysis
 
 
 def train(filenames: List[str], model_config_path: str, model_weights_path: str, gramm_dict_input: str,
@@ -35,11 +37,25 @@ def train(filenames: List[str], model_config_path: str, model_weights_path: str,
     lstm.train(filenames, model_config_path, model_weights_path, val_part=val_part, epochs_num=epochs_num)
 
 
-# if __name__ == "__main__":
-#     logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
-#     from rnnmorph.settings import RU_MORPH_DEFAULT_MODEL_CONFIG, RU_MORPH_DEFAULT_MODEL_WEIGHTS, \
-#         RU_MORPH_GRAMMEMES_DICT, RU_MORPH_GRAMMEMES_DICT_OUTPUT
-#     dir_name = "/media/data/Datasets/Morpho/clean"
-#     filenames = [os.path.join(dir_name, filename) for filename in os.listdir(dir_name)]
-#     train(filenames,  RU_MORPH_DEFAULT_MODEL_CONFIG, RU_MORPH_DEFAULT_MODEL_WEIGHTS, RU_MORPH_GRAMMEMES_DICT,
-#           RU_MORPH_GRAMMEMES_DICT_OUTPUT, val_part=0.1, epochs_num=1)
+def evaluate(filenames: List[str], model_config_path: str, model_weights_path: str, gramm_dict_input: str,
+             gramm_dict_output: str, val_part: float=0.1, random_seed: int=42):
+    lstm = LSTMMorphoAnalysis()
+    lstm.prepare(gramm_dict_input, gramm_dict_output, filenames)
+    lstm.load(model_config_path, model_weights_path)
+    print(lstm.model.summary())
+    np.random.seed(random_seed)
+    sample_counter = lstm.count_samples(filenames)
+    _, val_idx = lstm.get_split(sample_counter, val_part)
+    lstm.evaluate(filenames, val_idx)
+
+
+if __name__ == "__main__":
+    import sys
+    import logging
+    logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
+    from rnnmorph.settings import RU_MORPH_DEFAULT_MODEL_CONFIG, RU_MORPH_DEFAULT_MODEL_WEIGHTS, \
+        RU_MORPH_GRAMMEMES_DICT, RU_MORPH_GRAMMEMES_DICT_OUTPUT
+    dir_name = "/media/data/Datasets/Morpho/clean"
+    filenames = [os.path.join(dir_name, filename) for filename in os.listdir(dir_name)]
+    train(filenames,  RU_MORPH_DEFAULT_MODEL_CONFIG, RU_MORPH_DEFAULT_MODEL_WEIGHTS, RU_MORPH_GRAMMEMES_DICT,
+          RU_MORPH_GRAMMEMES_DICT_OUTPUT, val_part=0.1, epochs_num=30)
